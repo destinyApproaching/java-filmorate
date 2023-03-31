@@ -28,9 +28,8 @@ target/
 *.iws
 *.iml
 *.ipr
-.mvn
+mvn
 *.DS_Store
-*.db
 
 ### NetBeans ###
 /nbproject/private/
