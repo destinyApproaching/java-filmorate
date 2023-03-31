@@ -4,14 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.expection.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
-public class UserTests extends FilmorateApplicationTests {
+public class UserTests {
     private UserController userController;
 
     private final User user = User.builder()
@@ -47,32 +49,40 @@ public class UserTests extends FilmorateApplicationTests {
     public void shouldAddUserWhenEmailIsEmpty() {
         log.debug("Тест на добавление пользователя с путым email");
         user.setEmail("");
-
-        assertEquals("Электронная почта указана неверно" , userController.addUser(user));
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> userController.addUser(user)
+        );
+        assertEquals("Электронная почта указана неверно", ex.getMessage());
     }
 
     @Test
     public void shouldAddUserWhenEmailIsIncorrect() {
         log.debug("Тест на добавление пользователя с некорректный email");
         user.setEmail("yandex.ru");
-        userController.addUser(user);
-        assertEquals(0, userController.getUsers().size());
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> userController.addUser(user)
+        );
+        assertEquals("Электронная почта указана неверно", ex.getMessage());
     }
 
     @Test
     public void shouldAddUserWhenLoginIsEmpty() {
         log.debug("Тест на добавление пользователя с пустым логином");
         user.setLogin("");
-        userController.addUser(user);
-        assertEquals(0, userController.getUsers().size());
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> userController.addUser(user)
+        );
+        assertEquals("Логин не может быть пустым и содержать пробелы", ex.getMessage());
     }
 
     @Test
     public void shouldAddUserWhenLoginWithBlank() {
         log.debug("Тест на добавление пользователя, логин которого содержит пробел");
         user.setLogin("Hamster  Attack");
-        userController.addUser(user);
-        assertEquals(0, userController.getUsers().size());
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> userController.addUser(user)
+        );
+        assertEquals("Логин не может быть пустым и содержать пробелы", ex.getMessage());
     }
 
     @Test
@@ -87,7 +97,9 @@ public class UserTests extends FilmorateApplicationTests {
     public void shouldAddUserWhenBirthdayInFuture() {
         log.debug("Тест на добавление пользователя рождённым в будущем");
         user.setBirthday(LocalDate.of(2024, 12, 20));
-        userController.addUser(user);
-        assertEquals(0, userController.getUsers().size());
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> userController.addUser(user)
+        );
+        assertEquals("Дата рождения не может быть в будущем", ex.getMessage());
     }
 }

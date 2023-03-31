@@ -4,14 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.expection.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
-public class FilmTests extends FilmorateApplicationTests {
+public class FilmTests {
     private FilmController filmController;
 
     private final Film film = Film.builder()
@@ -47,8 +49,10 @@ public class FilmTests extends FilmorateApplicationTests {
     public void shouldAddFilmWhenNameIsEmpty() {
         log.debug("Тест на добавление фильма без названия");
         film.setName("");
-        filmController.addFilm(film);
-        assertEquals(0, filmController.getFilms().size());
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> filmController.addFilm(film)
+        );
+        assertEquals("Название не может быть пустым", ex.getMessage());
     }
 
     @Test
@@ -59,23 +63,29 @@ public class FilmTests extends FilmorateApplicationTests {
                 "решётки. Каждый, кто попадает в эти стены, становится их рабом до конца жизни. Но Энди, обладающий" +
                 "живым умом и доброй душой, находит подход как к заключённым, так и к охранникам, добиваясь их" +
                 "особого к себе расположения.");
-        filmController.addFilm(film);
-        assertEquals(0, filmController.getFilms().size());
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> filmController.addFilm(film)
+        );
+        assertEquals("Максимальная длина описания — 200 символов", ex.getMessage());
     }
 
     @Test
     public void shouldAddFilmWhenReleaseDateIsBeforeThan1895Year() {
         log.debug("Тест на добавление фильма вышедшего раньше 28 декабря 1895 года");
         film.setReleaseDate(LocalDate.of(1895, 12, 27));
-        filmController.addFilm(film);
-        assertEquals(0, filmController.getFilms().size());
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> filmController.addFilm(film)
+        );
+        assertEquals("Дата релиза — не раньше 28 декабря 1895 года", ex.getMessage());
     }
 
     @Test
     public void shouldAddFilmWhenDurationIsNegativeOrZeroNumber() {
         log.debug("Тест на добавление фильма с отрицательной или нулевой длительностью");
         film.setDuration(0L);
-        filmController.addFilm(film);
-        assertEquals(0, filmController.getFilms().size());
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> filmController.addFilm(film)
+        );
+        assertEquals("Продолжительность фильма должна быть положительной", ex.getMessage());
     }
 }
