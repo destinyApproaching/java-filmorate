@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
-public class UserTests {
+public class UserTests extends FilmorateApplicationTests {
     private UserController userController;
 
     private final User user = User.builder()

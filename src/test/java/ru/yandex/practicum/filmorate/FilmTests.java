@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
-public class FilmTests {
+public class FilmTests extends FilmorateApplicationTests {
     private FilmController filmController;
 
     private final Film film = Film.builder()
