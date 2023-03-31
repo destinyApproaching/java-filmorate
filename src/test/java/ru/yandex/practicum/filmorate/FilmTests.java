@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
-public class FilmTests extends FilmorateApplicationTests {
+public class FilmTests {
     private FilmController filmController;
 
     private final Film film = Film.builder()

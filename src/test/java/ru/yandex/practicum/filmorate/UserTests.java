@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
-public class UserTests extends FilmorateApplicationTests {
+public class UserTests {
     private UserController userController;
 
     private final User user = User.builder()
