@@ -9,8 +9,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
 
+@Data
 @Builder
-public @Data class User {
+public class User {
 
     private Integer id;
     @NonNull
