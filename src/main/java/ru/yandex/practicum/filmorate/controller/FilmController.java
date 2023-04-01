@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.jni.Local;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.expection.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -15,6 +16,9 @@ import java.util.Objects;
 @Slf4j
 @RequestMapping("/films")
 public class FilmController {
+    private static final  LocalDate FIRST_FILM_SESSION = LocalDate.of(1895, 12, 28);
+    private static final int MAX_DESC_SIZE = 200;
+
     private final List<Film> films = new ArrayList<>();
     private int id = 1;
 
@@ -63,10 +67,10 @@ public class FilmController {
         if (film.getName().isEmpty()) {
             throw new ValidationException("Название не может быть пустым");
         }
-        if (film.getDescription().length() > 200) {
-            throw new ValidationException("Максимальная длина описания — 200 символов");
+        if (film.getDescription().length() > MAX_DESC_SIZE) {
+            throw new ValidationException("Максимальная длина описания — " + MAX_DESC_SIZE + " символов");
         }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+        if (film.getReleaseDate().isBefore(FIRST_FILM_SESSION)) {
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
         if (film.getDuration() <= 0) {
