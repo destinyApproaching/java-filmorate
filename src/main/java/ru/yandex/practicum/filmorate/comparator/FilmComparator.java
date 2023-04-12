@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.comparator;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Comparator;
-import java.util.function.Function;
 
 public class FilmComparator implements Comparator<Film>{
     @Override
