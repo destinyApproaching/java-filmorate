@@ -27,6 +27,10 @@ public class Film {
 
     private final List<Integer> likes = new ArrayList<>();
 
+    public Integer getLikesCount() {
+        return likes.size();
+    }
+
     public void addLike(User user) {
         if (likes.contains(user.getId())) {
             throw new ValidationException(String.format("Пользователь %s уже лайкнул фильм %s",
