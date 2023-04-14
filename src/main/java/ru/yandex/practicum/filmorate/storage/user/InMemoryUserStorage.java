@@ -59,6 +59,16 @@ public class InMemoryUserStorage implements UserStorage {
         throw new UserNotFoundException(String.format("Пользователя с id=%d нет.", user.getId()));
     }
 
+    @Override
+    public void addFriend(int id, int friendId) {
+        getUserById(id).addFriend(getUserById(friendId));
+    }
+
+    @Override
+    public void deleteFriend(int id, int friendId) {
+        getUserById(id).deleteFriend(getUserById(friendId));
+    }
+
     private void increaseId() {
         id++;
     }

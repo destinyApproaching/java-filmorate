@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,23 +15,28 @@ import java.util.Set;
 @Service
 public class InMemoryUserService implements UserService {
     @Getter
-    private final InMemoryUserStorage inMemoryUserStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public InMemoryUserService(InMemoryUserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+        this.userStorage = inMemoryUserStorage;
     }
 
     @Override
-    public User getUser(int id) {
-        return inMemoryUserStorage.getUserById(id);
+    public List<User> getUsers() {
+        return userStorage.getUsers();
+    }
+
+    @Override
+    public User getUserById(int id) {
+        return userStorage.getUserById(id);
     }
 
     @Override
     public List<User> getUserFriends(int id) {
         List<User> usersFriends = new ArrayList<>();
-        for (Integer friend : inMemoryUserStorage.getUserById(id).getFriends()) {
-            usersFriends.add(inMemoryUserStorage.getUserById(friend));
+        for (Integer friend : userStorage.getUserById(id).getFriends()) {
+            usersFriends.add(userStorage.getUserById(friend));
         }
         return usersFriends;
     }
@@ -38,21 +44,31 @@ public class InMemoryUserService implements UserService {
     @Override
     public List<User> getMutualFriends(int id, int friendId) {
         List<User> usersFriends = new ArrayList<>();
-        Set<Integer> mutual = new HashSet<>(inMemoryUserStorage.getUserById(id).getFriends());
-        mutual.retainAll(inMemoryUserStorage.getUserById(friendId).getFriends());
+        Set<Integer> mutual = new HashSet<>(userStorage.getUserById(id).getFriends());
+        mutual.retainAll(userStorage.getUserById(friendId).getFriends());
         for (Integer friend : mutual) {
-            usersFriends.add(inMemoryUserStorage.getUserById(friend));
+            usersFriends.add(userStorage.getUserById(friend));
         }
         return usersFriends;
     }
 
     @Override
+    public User addUser(User user) {
+        return userStorage.addUser(user);
+    }
+
+    @Override
+    public User updateUser(User user) {
+        return userStorage.updateUser(user);
+    }
+
+    @Override
     public void addFriend(int id, int friendId) {
-        inMemoryUserStorage.getUserById(id).addFriend(inMemoryUserStorage.getUserById(friendId));
+        userStorage.addFriend(id, friendId);
     }
 
     @Override
     public void deleteFriend(int id, int friendId) {
-        inMemoryUserStorage.getUserById(id).deleteFriend(inMemoryUserStorage.getUserById(friendId));
+        userStorage.deleteFriend(id, friendId);
     }
 }

@@ -9,8 +9,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder
@@ -25,7 +25,7 @@ public class Film {
     @Positive
     private Long duration;
 
-    private final List<Integer> likes = new ArrayList<>();
+    private final Set<Integer> likes = new HashSet<>();
 
     public Integer getLikesCount() {
         return likes.size();

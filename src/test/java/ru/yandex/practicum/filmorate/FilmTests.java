@@ -1,0 +1,95 @@
+package ru.yandex.practicum.filmorate;
+
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.controller.FilmController;
+
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.film.InMemoryFilmService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+
+import java.time.LocalDate;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@Slf4j
+public class FilmTests {
+    private FilmController filmController;
+
+    private final Film film = Film.builder()
+            .id(1)
+            .name("Валидный фильм")
+            .description("Короткое описание, верная дата релиза и неотрицательная длительность")
+            .releaseDate(LocalDate.of(1994, 9, 10))
+            .duration(142L)
+            .build();
+
+    @BeforeEach
+    public void beforeEach() {
+        filmController = new FilmController(new InMemoryFilmService(new InMemoryFilmStorage(new InMemoryUserStorage())));
+    }
+
+    @Test
+    public void shouldAddFilmWhenFilmIsValid() {
+        log.debug("Тест на добавление валидного фильма");
+        filmController.addFilm(film);
+        assertEquals(1, filmController.getFilms().size());
+    }
+
+    @Test
+    public void shouldUpdateFilmWhenFilmIsValid() {
+        log.debug("Тест на обновление валидного фильма");
+        filmController.addFilm(film);
+        film.setName("Обновлённый фильм");
+        filmController.updateFilm(film);
+        assertEquals(film.getName(), filmController.getFilms().get(0).getName());
+    }
+
+    @Test
+    public void shouldAddFilmWhenNameIsEmpty() {
+        log.debug("Тест на добавление фильма без названия");
+        film.setName("");
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> filmController.addFilm(film)
+        );
+        assertEquals("Название не может быть пустым", ex.getMessage());
+    }
+
+    @Test
+    public void shouldAddFilmWhenDescriptionLengthMoreThan200Symbols() {
+        log.debug("Тест на добавление фильма с названием больше 200 символов");
+        film.setDescription("Бухгалтер Энди Дюфрейн обвинён в убийстве собственной жены и её любовника. Оказавшись в" +
+                "тюрьме под названием Шоушенк, он сталкивается с жестокостью и беззаконием, царящими по обе стороны" +
+                "решётки. Каждый, кто попадает в эти стены, становится их рабом до конца жизни. Но Энди, обладающий" +
+                "живым умом и доброй душой, находит подход как к заключённым, так и к охранникам, добиваясь их" +
+                "особого к себе расположения.");
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> filmController.addFilm(film)
+        );
+        assertEquals("Максимальная длина описания — 200 символов", ex.getMessage());
+    }
+
+    @Test
+    public void shouldAddFilmWhenReleaseDateIsBeforeThan1895Year() {
+        log.debug("Тест на добавление фильма вышедшего раньше 28 декабря 1895 года");
+        film.setReleaseDate(LocalDate.of(1895, 12, 27));
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> filmController.addFilm(film)
+        );
+        assertEquals("Дата релиза — не раньше 1895-12-28", ex.getMessage());
+    }
+
+    @Test
+    public void shouldAddFilmWhenDurationIsNegativeOrZeroNumber() {
+        log.debug("Тест на добавление фильма с отрицательной или нулевой длительностью");
+        film.setDuration(0L);
+        ValidationException ex = assertThrows(
+                ValidationException.class, () -> filmController.addFilm(film)
+        );
+        assertEquals("Продолжительность фильма должна быть положительной", ex.getMessage());
+    }
+}

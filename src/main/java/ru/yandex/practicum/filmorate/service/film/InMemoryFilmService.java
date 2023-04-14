@@ -1,12 +1,10 @@
 package ru.yandex.practicum.filmorate.service.film;
 
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.util.Comparator;
 import java.util.List;
@@ -15,41 +13,49 @@ import java.util.stream.Collectors;
 @Service
 public class InMemoryFilmService implements FilmService {
     public static final Integer LIMIT = 10;
-    @Getter
-    private final InMemoryUserStorage inMemoryUserStorage;
-    @Getter
-    private final InMemoryFilmStorage inMemoryFilmStorage;
+
+    private final FilmStorage filmStorage;
 
     @Autowired
-    public InMemoryFilmService(InMemoryUserStorage inMemoryUserStorage, InMemoryFilmStorage inMemoryFilmStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    public InMemoryFilmService(InMemoryFilmStorage inMemoryFilmStorage) {
+        this.filmStorage = inMemoryFilmStorage;
     }
 
     @Override
-    public Film getFilm(int id) {
-        return inMemoryFilmStorage.getFilmById(id);
+    public List<Film> getFilms() {
+        return filmStorage.getFilms();
+    }
+
+    @Override
+    public Film getFilmById(int id) {
+        return filmStorage.getFilmById(id);
     }
 
     @Override
     public List<Film> getPopularFilms(int count) {
-        return inMemoryFilmStorage.getFilms().stream()
+        return filmStorage.getFilms().stream()
                 .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
                 .limit(count)
                 .collect(Collectors.toList());
     }
 
     @Override
+    public Film addFilm(Film film) {
+        return filmStorage.addFilm(film);
+    }
+
+    @Override
+    public Film updateFilm(Film film) {
+        return filmStorage.updateFilm(film);
+    }
+
+    @Override
     public void addLike(int id, int userId) {
-        Film film = inMemoryFilmStorage.getFilmById(id);
-        User user = inMemoryUserStorage.getUserById(userId);
-        film.addLike(user);
+        filmStorage.addLike(id, userId);
     }
 
     @Override
     public void deleteLike(int id, int userId) {
-        Film film = inMemoryFilmStorage.getFilmById(id);
-        User user = inMemoryUserStorage.getUserById(userId);
-        film.deleteLike(user);
+        filmStorage.deleteLike(id, userId);
     }
 }

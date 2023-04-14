@@ -8,8 +8,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder
@@ -27,7 +27,7 @@ public class User {
     @Past
     private LocalDate birthday;
 
-    private final List<Integer> friends = new ArrayList<>();
+    private final Set<Integer> friends = new HashSet<>();
 
     public void addFriend(User user) {
         if (this.equals(user)) {

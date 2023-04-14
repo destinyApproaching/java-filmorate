@@ -1,10 +1,14 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -16,9 +20,17 @@ import java.util.Optional;
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
     private final List<Film> films = new ArrayList<>();
+    private final UserStorage userStorage;
+
     private int id = 1;
+
     private static final LocalDate FIRST_FILM_SESSION = LocalDate.of(1895, 12, 28);
     private static final int MAX_DESC_SIZE = 200;
+
+    @Autowired
+    public InMemoryFilmStorage(InMemoryUserStorage inMemoryUserStorage) {
+        this.userStorage = inMemoryUserStorage;
+    }
 
     @Override
     public List<Film> getFilms() {
@@ -60,6 +72,20 @@ public class InMemoryFilmStorage implements FilmStorage {
             }
         }
         throw new FilmNotFoundException(String.format("Фильм %s не найден.", film.getName()));
+    }
+
+    @Override
+    public void addLike(int id, int userId) {
+        Film film = getFilmById(id);
+        User user = userStorage.getUserById(userId);
+        film.addLike(user);
+    }
+
+    @Override
+    public void deleteLike(int id, int userId) {
+        Film film = getFilmById(id);
+        User user = userStorage.getUserById(userId);
+        film.deleteLike(user);
     }
 
     private void increaseId() {
