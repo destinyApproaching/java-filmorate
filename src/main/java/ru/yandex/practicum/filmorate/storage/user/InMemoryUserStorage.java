@@ -7,10 +7,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -67,6 +64,26 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void deleteFriend(int id, int friendId) {
         getUserById(id).deleteFriend(getUserById(friendId));
+    }
+
+    @Override
+    public List<User> getUserFriends(int id) {
+        List<User> usersFriends = new ArrayList<>();
+        for (Integer friend : getUserById(id).getFriends()) {
+            usersFriends.add(getUserById(friend));
+        }
+        return usersFriends;
+    }
+
+    @Override
+    public List<User> getMutualFriends(int id, int friendId) {
+        List<User> mutualFriends = new ArrayList<>();
+        Set<Integer> mutual = new HashSet<>(getUserById(id).getFriends());
+        mutual.retainAll(getUserById(friendId).getFriends());
+        for (Integer friend : mutual) {
+            mutualFriends.add(getUserById(friend));
+        }
+        return mutualFriends;
     }
 
     private void increaseId() {

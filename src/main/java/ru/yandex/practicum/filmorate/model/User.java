@@ -16,11 +16,9 @@ import java.util.Set;
 @Slf4j
 public class User {
     private Integer id;
-    @NonNull
     @NotBlank
     @Email
     private String email;
-    @NonNull
     @NotBlank
     private String login;
     private String name;
