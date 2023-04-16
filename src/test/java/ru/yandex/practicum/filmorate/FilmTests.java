@@ -4,8 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
-import ru.yandex.practicum.filmorate.expection.ValidationException;
+
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.film.InMemoryFilmService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
@@ -26,7 +30,7 @@ public class FilmTests {
 
     @BeforeEach
     public void beforeEach() {
-        filmController = new FilmController();
+        filmController = new FilmController(new InMemoryFilmService(new InMemoryFilmStorage(new InMemoryUserStorage())));
     }
 
     @Test
@@ -76,7 +80,7 @@ public class FilmTests {
         ValidationException ex = assertThrows(
                 ValidationException.class, () -> filmController.addFilm(film)
         );
-        assertEquals("Дата релиза — не раньше 28 декабря 1895 года", ex.getMessage());
+        assertEquals("Дата релиза — не раньше 1895-12-28", ex.getMessage());
     }
 
     @Test
