@@ -1,2 +1,5 @@
 # java-filmorate
-Template repository for Filmorate project.
+Филморейт - это небольшая социальная сеть с оценками фильмов.
+
+Вот наглядная структура БД.
+https://dbdiagram.io/d/644bf142dca9fb07c438056a
