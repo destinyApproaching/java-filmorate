@@ -4,6 +4,6 @@
 
 ## ER-диаграмма
 
-![dataBase](dataBase.png)
+![База данных](dataBase.png)
 
 Так же ссылка на эту диаграмму: https://dbdiagram.io/d/644bf142dca9fb07c438056a
