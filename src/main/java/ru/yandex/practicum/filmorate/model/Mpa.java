@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @Builder
 public class Mpa {
-    private  int id;
+    private int id;
     @NotBlank
     private String name;
 }

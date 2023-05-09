@@ -20,7 +20,7 @@ import java.util.Set;
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    public UserDbStorage(JdbcTemplate jdbcTemplate){
+    public UserDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -93,7 +93,7 @@ public class UserDbStorage implements UserStorage {
         checker(id);
         checker(friendId);
         String sqlQueryToFind = "select * from FRIENDS where USER_ID = ? and FRIEND_ID = ?;";
-        SqlRowSet userRows =jdbcTemplate.queryForRowSet(sqlQueryToFind, id, friendId);
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQueryToFind, id, friendId);
         SqlRowSet friendRows = jdbcTemplate.queryForRowSet(sqlQueryToFind, friendId, id);
         if (userRows.next()) {
             if (userRows.getString("USER_STATUS").equals("CONFIRMED")) {
