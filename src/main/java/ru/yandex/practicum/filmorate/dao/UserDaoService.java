@@ -1,22 +1,21 @@
-package ru.yandex.practicum.filmorate.service.user;
+package ru.yandex.practicum.filmorate.dao;
 
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
 
 @Service
-public class InMemoryUserService implements UserService {
-    @Getter
+public class UserDaoService implements UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public InMemoryUserService(InMemoryUserStorage inMemoryUserStorage) {
-        this.userStorage = inMemoryUserStorage;
+    public UserDaoService(UserDbStorage userDbStorage) {
+        this.userStorage = userDbStorage;
     }
 
     @Override
@@ -40,18 +39,19 @@ public class InMemoryUserService implements UserService {
     }
 
     @Override
+    public void addFriend(int id, int friendId) {
+        userStorage.addFriend(id, friendId);
+    }
+
+    @Override
     public User addUser(User user) {
-        return userStorage.addUser(user);
+        userStorage.addUser(user);
+        return user;
     }
 
     @Override
     public User updateUser(User user) {
         return userStorage.updateUser(user);
-    }
-
-    @Override
-    public void addFriend(int id, int friendId) {
-        userStorage.addFriend(id, friendId);
     }
 
     @Override

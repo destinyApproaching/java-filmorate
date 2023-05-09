@@ -1,24 +1,21 @@
-package ru.yandex.practicum.filmorate.service.film;
+package ru.yandex.practicum.filmorate.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-public class InMemoryFilmService implements FilmService {
-    public static final Integer LIMIT = 10;
-
+public class FilmDaoService implements FilmService {
     private final FilmStorage filmStorage;
 
     @Autowired
-    public InMemoryFilmService(InMemoryFilmStorage inMemoryFilmStorage) {
-        this.filmStorage = inMemoryFilmStorage;
+    public FilmDaoService(FilmDbStorage filmDbStorage) {
+        this.filmStorage = filmDbStorage;
     }
 
     @Override
@@ -33,10 +30,7 @@ public class InMemoryFilmService implements FilmService {
 
     @Override
     public List<Film> getPopularFilms(int count) {
-        return filmStorage.getFilms().stream()
-                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getPopularFilms(count);
     }
 
     @Override
