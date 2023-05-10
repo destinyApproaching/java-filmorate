@@ -59,6 +59,5 @@ public class GenreDbStorage implements GenreStorage {
                     genreRows.getString("GENRE_NAME")));
         }
         return genres;
-        /*выбрать все жанры с айдишником фильма, пробежаться по списку фильмов и каждому установить жанр*/
     }
 }
