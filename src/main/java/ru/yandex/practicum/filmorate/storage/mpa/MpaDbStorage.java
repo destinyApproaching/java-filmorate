@@ -3,14 +3,15 @@ package ru.yandex.practicum.filmorate.storage.mpa;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Repository
 @Slf4j
 public class MpaDbStorage implements MpaStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -22,7 +23,7 @@ public class MpaDbStorage implements MpaStorage {
     @Override
     public List<Mpa> getMpas() {
         List<Mpa> mpas = new ArrayList<>();
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("select * from RATINGS;");
+        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("select RATING_ID from RATINGS;");
         while (mpaRows.next()) {
             mpas.add(getMpaById(Integer.parseInt(mpaRows.getString("RATING_ID"))));
         }
@@ -31,7 +32,8 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Mpa getMpaById(int id) {
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("select * from RATINGS where RATING_ID = ?;", id);
+        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("select RATING_ID, RATING_NAME from RATINGS " +
+                "where RATING_ID = ?;", id);
         if (mpaRows.next()) {
             Mpa mpa = new Mpa(
                     Integer.parseInt(mpaRows.getString("RATING_ID")),

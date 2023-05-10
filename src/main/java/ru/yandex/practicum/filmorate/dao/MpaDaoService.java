@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.MpaService;
-import ru.yandex.practicum.filmorate.storage.mpa.MpaDbStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.util.List;
@@ -14,8 +13,8 @@ public class MpaDaoService implements MpaService {
     private final MpaStorage mpaStorage;
 
     @Autowired
-    public MpaDaoService(MpaDbStorage mpaDbStorage) {
-        this.mpaStorage = mpaDbStorage;
+    public MpaDaoService(MpaStorage mpaStorage) {
+        this.mpaStorage = mpaStorage;
     }
 
     @Override

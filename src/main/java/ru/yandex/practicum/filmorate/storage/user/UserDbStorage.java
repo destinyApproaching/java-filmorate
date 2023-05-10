@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Component
+@Repository
 @Slf4j
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -27,7 +27,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getUsers() {
         List<User> users = new ArrayList<>();
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from USERS;");
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select USER_ID from USERS;");
         while (userRows.next()) {
             users.add(getUserById(Integer.parseInt(userRows.getString("USER_ID"))));
         }
@@ -36,7 +36,8 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getUserById(int id) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from USERS where USER_ID = ?;", id);
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select USER_ID, USER_EMAIL, USER_LOGIN, USER_NAME, " +
+                "USER_BIRTHDAY from USERS where USER_ID = ?;", id);
         if (userRows.next()) {
             SqlRowSet friendsRows = jdbcTemplate.queryForRowSet(
                     "select FRIEND_ID from FRIENDS where (USER_ID = ?);", id);
@@ -77,7 +78,7 @@ public class UserDbStorage implements UserStorage {
     public User updateUser(User user) {
         checker(user.getId());
         isValid(user);
-        String sqlQuery = "select * from FRIENDS where USER_ID = ?;";
+        String sqlQuery = "select USER_ID, FRIEND_ID, FRIEND_STATUS from FRIENDS where USER_ID = ?;";
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQuery, user.getId());
         while (userRows.next()) {
             deleteFriend(user.getId(), userRows.findColumn("FRIEND_ID"));
@@ -92,7 +93,8 @@ public class UserDbStorage implements UserStorage {
     public void addFriend(int id, int friendId) {
         checker(id);
         checker(friendId);
-        String sqlQueryToFind = "select * from FRIENDS where USER_ID = ? and FRIEND_ID = ?;";
+        String sqlQueryToFind = "select USER_ID, FRIEND_ID, FRIEND_STATUS from FRIENDS " +
+                "where USER_ID = ? and FRIEND_ID = ?;";
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQueryToFind, id, friendId);
         SqlRowSet friendRows = jdbcTemplate.queryForRowSet(sqlQueryToFind, friendId, id);
         if (userRows.next()) {
@@ -120,7 +122,8 @@ public class UserDbStorage implements UserStorage {
     public void deleteFriend(int id, int friendId) {
         checker(id);
         checker(friendId);
-        String sqlQueryToFind = "select * from FRIENDS where USER_ID = ? and FRIEND_ID = ?;";
+        String sqlQueryToFind = "select USER_ID, FRIEND_ID, FRIEND_STATUS from FRIENDS " +
+                "where USER_ID = ? and FRIEND_ID = ?;";
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQueryToFind, id, friendId);
         if (userRows.next()) {
             String sqlQueryToDelete = "delete from FRIENDS where USER_ID = ? and FRIEND_ID = ?;";
@@ -140,7 +143,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getUserFriends(int id) {
         List<User> friends = new ArrayList<>();
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from FRIENDS where USER_ID = ?;", id);
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select FRIEND_ID from FRIENDS where USER_ID = ?;", id);
         while (userRows.next()) {
             friends.add(getUserById(Integer.parseInt(userRows.getString("FRIEND_ID"))));
         }
@@ -152,7 +155,7 @@ public class UserDbStorage implements UserStorage {
         List<User> mutualFriends = new ArrayList<>();
         Set<Integer> userFriends = new HashSet<>();
         Set<Integer> friendFriends = new HashSet<>();
-        String sqlQuery = "select * from FRIENDS where USER_ID = ?;";
+        String sqlQuery = "select FRIEND_ID from FRIENDS where USER_ID = ?;";
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
         while (userRows.next()) {
             userFriends.add(Integer.parseInt(userRows.getString("FRIEND_ID")));

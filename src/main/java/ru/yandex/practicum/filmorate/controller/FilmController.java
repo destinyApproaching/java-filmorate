@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.dao.FilmDaoService;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -16,8 +15,8 @@ public class FilmController {
     private final FilmService filmService;
 
     @Autowired
-    public FilmController(FilmDaoService filmDaoService) {
-        this.filmService = filmDaoService;
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
     }
 
     @GetMapping

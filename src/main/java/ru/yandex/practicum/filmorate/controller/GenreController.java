@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.dao.GenreDaoService;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.GenreService;
 
@@ -14,8 +13,8 @@ public class GenreController {
     private final GenreService genreService;
 
     @Autowired
-    public GenreController(GenreDaoService genreDaoService) {
-        this.genreService = genreDaoService;
+    public GenreController(GenreService genreService) {
+        this.genreService = genreService;
     }
 
     @GetMapping

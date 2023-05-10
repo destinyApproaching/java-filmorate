@@ -4,59 +4,53 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.mpa.MpaDbStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
+@Repository
 @Slf4j
 public class FilmDbStorage implements FilmStorage {
     private static final LocalDate FIRST_FILM_SESSION = LocalDate.of(1895, 12, 28);
     private static final int MAX_DESC_SIZE = 200;
 
     private final JdbcTemplate jdbcTemplate;
-    private final MpaDbStorage mpaDbStorage;
-    private final GenreDbStorage genreDbStorage;
+    private final MpaStorage mpaStorage;
+    private final GenreStorage genreStorage;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, MpaDbStorage mpaDbStorage, GenreDbStorage genreDbStorage) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, MpaStorage mpaStorage, GenreStorage genreStorage) {
         this.jdbcTemplate = jdbcTemplate;
-        this.mpaDbStorage = mpaDbStorage;
-        this.genreDbStorage = genreDbStorage;
+        this.mpaStorage = mpaStorage;
+        this.genreStorage = genreStorage;
     }
 
     @Override
     public List<Film> getFilms() {
         List<Film> films = new ArrayList<>();
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from FILMS;");
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select FILM_ID, FILM_NAME, FILM_DESCRIPTION, " +
+                "FILM_RELEASEDATE, FILM_DURATION, RATING_ID from FILMS;");
         while (filmRows.next()) {
             films.add(getFilmById(Integer.parseInt(filmRows.getString("FILM_ID"))));
         }
         return films;
     }
 
+
     @Override
     public Film getFilmById(int id) {
-        String sqlQuery = "select * from FILMS where FILM_ID = ?";
+        String sqlQuery = "select FILM_ID, FILM_NAME, FILM_DESCRIPTION, FILM_RELEASEDATE, FILM_DURATION, RATING_ID " +
+                "from FILMS where FILM_ID = ?";
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (filmRows.next()) {
-            sqlQuery = "select * from GENRES as ge right join FILM_GENRE as fg on ge.GENRE_ID = fg.GENRE_ID " +
-                    "where fg.FILM_ID = ?;";
-            SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sqlQuery,
-                    Integer.parseInt(filmRows.getString("FILM_ID")));
-            List<Genre> genres = new ArrayList<>();
-            while (genreRows.next()) {
-                genres.add(genreDbStorage.getGenreById(
-                        Integer.parseInt(genreRows.getString("GENRE_ID"))));
-            }
             sqlQuery = "select USER_ID from LIKES where FILM_ID = ?";
             SqlRowSet likesRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
             Set<Integer> likes = new HashSet<>();
@@ -70,8 +64,8 @@ public class FilmDbStorage implements FilmStorage {
                     LocalDate.parse(filmRows.getString("FILM_RELEASEDATE")),
                     Integer.parseInt(filmRows.getString("FILM_DURATION")),
                     likes,
-                    genres,
-                    mpaDbStorage.getMpaById(Integer.parseInt(filmRows.getString("RATING_ID"))));
+                    genreStorage.getGenresByFilmId(Integer.parseInt(filmRows.getString("FILM_ID"))),
+                    mpaStorage.getMpaById(Integer.parseInt(filmRows.getString("RATING_ID"))));
             log.info("Фильм найден: {} {}", film.getId(), film.getName());
             return film;
         } else {
@@ -83,11 +77,11 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         isValid(film);
-        film.setMpa(mpaDbStorage.getMpaById(film.getMpa().getId()));
+        film.setMpa(mpaStorage.getMpaById(film.getMpa().getId()));
         List<Genre> genres = film.getGenres();
         if (genres != null) {
             for (Genre genre : genres) {
-                genreDbStorage.getGenreById(genre.getId());
+                genreStorage.getGenreById(genre.getId());
             }
         }
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
@@ -108,7 +102,7 @@ public class FilmDbStorage implements FilmStorage {
                 "FILM_DURATION = ?, RATING_ID = ? where FILM_ID = ?;";
         jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
                 film.getMpa().getId(), film.getId());
-        film.setMpa(mpaDbStorage.getMpaById(film.getMpa().getId()));
+        film.setMpa(mpaStorage.getMpaById(film.getMpa().getId()));
         return getFilmById(film.getId());
     }
 
@@ -149,7 +143,7 @@ public class FilmDbStorage implements FilmStorage {
             for (Genre genre : genres) {
                 sqlQuery = "insert into FILM_GENRE (FILM_ID, GENRE_ID) values (?, ?);";
                 jdbcTemplate.update(sqlQuery, filmId, genre.getId());
-                genre = genreDbStorage.getGenreById(genre.getId());
+                genre = genreStorage.getGenreById(genre.getId());
                 newGenres.add(genre);
             }
         }
@@ -157,7 +151,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void filmChecker(int id) {
-        String sqlQuery = "select * from FILMS where FILM_ID = ?;";
+        String sqlQuery = "select FILM_ID from FILMS where FILM_ID = ?;";
         SqlRowSet filmId = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (filmId.next()) {
             log.info("Пользователя с id = {} есть в бд", id);

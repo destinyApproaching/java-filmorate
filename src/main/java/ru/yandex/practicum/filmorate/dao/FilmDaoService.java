@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.List;
@@ -14,8 +13,8 @@ public class FilmDaoService implements FilmService {
     private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmDaoService(FilmDbStorage filmDbStorage) {
-        this.filmStorage = filmDbStorage;
+    public FilmDaoService(FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
     }
 
     @Override

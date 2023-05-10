@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.dao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -14,8 +13,8 @@ public class UserDaoService implements UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public UserDaoService(UserDbStorage userDbStorage) {
-        this.userStorage = userDbStorage;
+    public UserDaoService(UserStorage userStorage) {
+        this.userStorage = userStorage;
     }
 
     @Override
