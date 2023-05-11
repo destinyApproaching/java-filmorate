@@ -43,18 +43,7 @@ public class FilmDbStorage implements FilmStorage {
         Map<Integer, List<Genre>> filmGenresMap = genreStorage.getFilmGenre();
         Map<Integer, Mpa> mpaMap = mpaStorage.getMpasWithId();
         while (filmRows.next()) {
-            Film film = new Film(Integer.parseInt(filmRows.getString("FILM_ID")),
-                    filmRows.getString("FILM_NAME"),
-                    filmRows.getString("FILM_DESCRIPTION"),
-                    LocalDate.parse(filmRows.getString("FILM_RELEASEDATE")),
-                    Integer.parseInt(filmRows.getString("FILM_DURATION")),
-                    likesMap.getOrDefault(
-                            Integer.parseInt(filmRows.getString("FILM_ID")),
-                            new HashSet<>()),
-                    filmGenresMap.getOrDefault(
-                            Integer.parseInt(filmRows.getString("FILM_ID")),
-                            new ArrayList<>()),
-                    mpaMap.get(Integer.parseInt(filmRows.getString("FILM_ID"))));
+            Film film = createNewFilm(filmRows, likesMap, filmGenresMap, mpaMap);
             films.add(film);
         }
         return films;
@@ -94,25 +83,31 @@ public class FilmDbStorage implements FilmStorage {
         Map<Integer, List<Genre>> filmGenresMap = genreStorage.getFilmGenre();
         Map<Integer, Mpa> mpaMap = mpaStorage.getMpasWithId();
         if (filmRows.next()) {
-            Film film = new Film(
-                    Integer.parseInt(filmRows.getString("FILM_ID")),
-                    filmRows.getString("FILM_NAME"),
-                    filmRows.getString("FILM_DESCRIPTION"),
-                    LocalDate.parse(filmRows.getString("FILM_RELEASEDATE")),
-                    Integer.parseInt(filmRows.getString("FILM_DURATION")),
-                    likesMap.getOrDefault(
-                            Integer.parseInt(filmRows.getString("FILM_ID")),
-                            new HashSet<>()),
-                    filmGenresMap.getOrDefault(
-                            Integer.parseInt(filmRows.getString("FILM_ID")),
-                            new ArrayList<>()),
-                    mpaMap.get(Integer.parseInt(filmRows.getString("FILM_ID"))));
+            Film film = createNewFilm(filmRows, likesMap, filmGenresMap, mpaMap);
             log.info("Фильм найден: {} {}", film.getId(), film.getName());
             return film;
         } else {
             log.warn("Фильм с id={} не найден.", id);
             throw new FilmNotFoundException(String.format("Фильм с идентификатором %d не найден.", id));
         }
+    }
+
+    private Film createNewFilm(SqlRowSet filmRows,
+                               Map<Integer, Set<Integer>> likesMap,
+                               Map<Integer, List<Genre>> filmGenresMap,
+                               Map<Integer,Mpa> mpaMap) {
+        return new Film(Integer.parseInt(filmRows.getString("FILM_ID")),
+                filmRows.getString("FILM_NAME"),
+                filmRows.getString("FILM_DESCRIPTION"),
+                LocalDate.parse(filmRows.getString("FILM_RELEASEDATE")),
+                Integer.parseInt(filmRows.getString("FILM_DURATION")),
+                likesMap.getOrDefault(
+                        Integer.parseInt(filmRows.getString("FILM_ID")),
+                        new HashSet<>()),
+                filmGenresMap.getOrDefault(
+                        Integer.parseInt(filmRows.getString("FILM_ID")),
+                        new ArrayList<>()),
+                mpaMap.get(Integer.parseInt(filmRows.getString("FILM_ID"))));
     }
 
     @Override
