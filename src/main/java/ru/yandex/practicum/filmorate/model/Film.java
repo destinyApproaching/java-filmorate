@@ -28,6 +28,13 @@ public class Film {
     private List<Genre> genres;
     private Mpa mpa;
 
+    public final int getLikeSize() {
+        if (likes == null) {
+            return 0;
+        }
+        return likes.size();
+    }
+
     public Map<String, Object> toMap() {
         Map<String, Object> values = new HashMap<>();
         values.put("FILM_NAME", name);
